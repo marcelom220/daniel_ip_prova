@@ -1,0 +1,25 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	template="WEB-INF/templates/template.xhtml">
+
+	<ui:define name="head-end">
+		<ui:param name="renderBreadCrumb" value="false" />
+	</ui:define>
+
+	<ui:define name="title">
+		<p:growl autoUpdate="true" life="4000" />
+
+		<h2 class="align-center">
+			Bem vindo! <br />
+
+		</h2>
+		<a href="https://www.daniel-ip.com/pt/" class="img-rounded"> <img
+			src="#{resource['images/header_logo_daniel-ip.jpg']}" alt="Daniel ip"
+			style="align-content: center; text-align: center;" height="100"  width="420">
+		</img></a>
+
+	</ui:define>
+
+
+</ui:composition>

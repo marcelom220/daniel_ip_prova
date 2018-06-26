@@ -1,0 +1,150 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:adm="http://github.com/adminfaces"
+	template="/WEB-INF/templates/template.xhtml">
+
+	<ui:define name="head-end">
+		<style type="text/css">
+.ui-grid-row .ui-grid-col-2, .ui-grid-row .ui-grid-col-10 {
+	padding: 0.5em 0;
+	margin-left: 10px;
+}
+
+.ui-orderlist .ui-orderlist-list {
+	height: auto;
+}
+
+.ui-orderlist .ui-grid-row .ui-grid-col-2, .ui-orderlist .ui-grid-row .ui-grid-col-10
+	{
+	padding: 0;
+}
+</style>
+	</ui:define>
+
+	<ui:define name="title">
+        Pesquisa de clientes
+    </ui:define>
+
+	<ui:define name="description">
+        Pesquise ... 
+    </ui:define>
+
+	<ui:define name="body">
+		<f:metadata>
+			<f:viewAction action="#{listaClientesMB.inicializar}" />
+		</f:metadata>
+		<adm:breadcrumb title="Pesquisa" />
+
+		<h:form id="frmPesquisa">
+			<div class="box box-primary">
+				<div class="box-header with-border">
+					<p:commandButton action="cadastro-clientes?faces-redirect=true"
+						ajax="false" icon="fa fa-plus" value="Novo"
+						styleClass="btn-primary" />
+					<p:spacer width="5" />
+					<p:commandButton value="Excluir Selecionado(s)" icon="fa fa-trash"
+						styleClass="btn-danger" process="@form" update="@form"
+						action="#{listaClientesMB.excluirSelecionados}" />
+					<p:spacer width="5" />
+					<p:commandButton value="Olhar Selecionado(s)"
+						oncomplete="PF('clienteSelecionadas').show()"
+						update="@(.ui-dialog)" styleClass="btn-info" icon="fa fa-search" />
+					<p:separator />
+					<br /> <br />
+					<p:panelGrid columns="5">
+						<p:outputLabel for="cpf" value="CPF" />
+						<p:inputMask id="cpf" mask="999.999.999-99" size="50"
+							value="#{listaClientesMB.cpf}" onkeypress="#{lista}" />
+						<p:outputLabel for="nome" value="Nome" />
+						<p:inputText id="nome" size="50" maxlength="150"
+							value="#{listaClientesMB.nome}" />
+						<p:commandButton label="Pesquisar" value="Pesquisar"
+							action="#{listaClientesMB.pesquisar}" update="clienteTable" />
+					</p:panelGrid>
+
+
+					<p:dataTable id="clienteTable" widgetVar="clienteTable" rows="10"
+						paginator="true" value="#{listaClientesMB.clientes}" var="cliente"
+						paginatorPosition="bottom" rowKey="#{cliente.id}"
+						selection="#{listaClientesMB.clientesSelecionados}"
+						paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} "
+						currentPageReportTemplate=""
+						emptyMessage="Não existem clientes cadastrados"
+						rowsPerPageTemplate="5,10,15,20,30">
+
+						<!--  >p:ajax event="rowSelectCheckbox" update="@(.ui-button)"/>
+	                        <p:ajax event="rowUnselectCheckbox" update="@(.ui-button)"/>
+	                        <p:ajax event="rowSelect" update="@(.ui-button)"/>
+	                        <p:ajax event="rowUnselect" update="@(.ui-button)"/-->
+
+
+						<p:column selectionMode="multiple" width="5%"
+							styleClass="align-center" />
+						<p:column headerText="CPF" style="width: 150px;">
+							<h:link value="#{cliente.cpf}" outcome="cadastro-clientes.xhtml">
+								<f:param name="id" value="#{cliente.id}" />
+							</h:link>
+						</p:column>
+						<p:column headerText="Nome">
+							<p:outputLabel value="#{cliente.nome}" />
+						</p:column>
+
+						<p:column headerText="Sexo"
+							style="width: 120px; text-align: center">
+							<p:outputLabel value="#{cliente.sexo eq 'm'? 'Masculino' : 'Feminino'}" />
+						</p:column>
+						<p:column headerText="Estado civil" style="width: 120px;">
+							<p:selectOneMenu value="#{cliente.estadoCivil}" disabled="true">
+								<f:selectItems value="#{listaClientesMB.estadoCivil}"
+									var="estado" itemLabel="#{estado.descricao}"
+									itemValue="#{estado}" />
+							</p:selectOneMenu>
+						</p:column>
+						<p:column headerText="Ativo"
+							style="width: 70px; text-align: center">
+							<p:outputLabel value="#{cliente.ativo  == true? 'Sim' : 'Não'}" />
+						</p:column>
+						<p:column style="width: 100px; text-align: center">
+							<p:commandButton icon="ui-icon-trash" title="Excluir"
+								oncomplete="PF('confirmacaoExclusao').show()" process="@this"
+								update=":frmPesquisa:confirmacaoExclusaoDialog">
+								<f:setPropertyActionListener
+									target="#{listaClientesMB.clienteSelecionado}"
+									value="#{cliente}" />
+							</p:commandButton>
+						</p:column>
+
+
+					</p:dataTable>
+					<p:confirmDialog id="confirmacaoExclusaoDialog"
+						widgetVar="confirmacaoExclusao"
+						message="Tem certeza que deseja excluir o carro cliente #{listaClientesMB.clienteSelecionado.nome}?"
+						header="Exclusão de cliente" severity="alert">
+						<p:button value="Não"
+							onclick="PF('confirmacaoExclusao').hide(); return false;" />
+						<p:commandButton value="Sim" update="clienteTable" process="@this"
+							oncomplete="PF('confirmacaoExclusao').hide()"
+							action="#{listaClientesMB.excluir}" />
+					</p:confirmDialog>
+				</div>
+			</div>
+		</h:form>
+
+		<p:dialog header="Clientes Selecionados"
+			widgetVar="clienteSelecionadas" height="250" width="400"
+			responsive="true" styleClass="box-success">
+			<p:dataList id="listaSelecionadas"
+				value="#{listaClientesMB.clientesSelecionados}" var="cliente"
+				type="definition">
+		CPF: #{cliente.cpf} Nome: #{cliente.nome} Ativo: #{cliente.ativo  == true? 'Sim' : 'Não'}
+			</p:dataList>
+
+		</p:dialog>
+
+
+	</ui:define>
+
+</ui:composition>
